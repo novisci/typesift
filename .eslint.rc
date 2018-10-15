@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  }, 
+  "rules" :{
+      //"semi": ["always", { "omitLastInOneLineBlock": true }],
+      "semi": ["never"],
+      // disallow declaration of variables that are not used in the code
+      "no-unused-vars": ["error", {"vars": "all", "args": "none"}]
+  }
+}
+

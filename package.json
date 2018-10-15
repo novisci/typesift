@@ -1,0 +1,14 @@
+{
+  "name": "typesift",
+  "version": "1.0.0",
+  "description": "NoviSci compact complex data type definitions and value validation",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "author": "Paul Rowan <prowan@novisci.com>",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "3.1.0"
+  }
+}
