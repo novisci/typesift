@@ -1,14 +1,11 @@
-const fp = require('./fp');
-
-function fail(msg) { throw new Error(msg); }
-
+// Set up logging
 const log = [];
 let widths = [];
 function l() {
   let line = [...arguments].map(x => (typeof x === 'string') ? x : (typeof x === 'function') ? x.toString() : JSON.stringify(x));
   widths = line.map( (x,i) => {
     if (!widths[i]) widths[i] = 0;
-    x = x.replace(/\x1b.*m/, '')
+    x = x.replace(/\x1b.*m/, '');
     return Math.max(x.length, widths[i]);
   });
   log.push(line);
@@ -24,16 +21,8 @@ const FgGreen = "\x1b[32m";
 const Reset = "\x1b[0m";
 const failed = FgRed+'FAILED'+Reset;
 const passed = FgGreen+' pass '+Reset;
-// const failed = 'FAILED';
-// const passed = ' pass ';
 
-// function functionWantToMeasure() {
-//   var startTime = process.hrtime();
-//   //do some task...
-//   var elapsedSeconds = parseHrtimeToSeconds(process.hrtime(startTime));
-//   console.log('functionWantToMeasure takes ' + elapsedSeconds + 'seconds');
-// }
-
+// Timing functions
 function parseHrtimeToMicroseconds(hrtime) {
   var seconds = (hrtime[0] + (hrtime[1] / 1e3));
   return seconds;
@@ -56,20 +45,19 @@ function timeFunction(fn) {
   return `${med} 𝛍s`;
 }
 
-function True(name, fnExpr) {
-  if (!fnExpr()) l(name,fnExpr,fnExpr(),failed, timeFunction(fnExpr));
-  else l(name,fnExpr,fnExpr(),passed, timeFunction(fnExpr));
-}
+// Test harness functions
+const Tester = (fnTest) => (name, ...args) => { 
+  // Perform test and emit a log entry 
+  l(name, args[0], args[0](), fnTest(...args) ? passed : failed, timeFunction(args[0]));
+};
 
-function False(name, fnExpr) {
-  if (fnExpr()) l(name,fnExpr,fnExpr(),failed, timeFunction(fnExpr));
-  else l(name,fnExpr,fnExpr(),passed, timeFunction(fnExpr));
-}
+const True = Tester(f => f());
+const False = Tester(f => !f());
+const Comparator = (fnCompare) => Tester((fnA,b) => fnCompare(fnA(),b));
 
-function Compare(name, fnA, b) {
-  if (!compare(fnA(),b)) l(name,fnA,fnA(),failed, timeFunction(fnA));
-  else l(name,fnA,fnA(),passed, timeFunction(fnA));
-}
+const CaughtException = (f) => {try {f();} catch(e) {return true;} return false;};
+// const Throws = Tester(f => true);//CaughtException(f));
+// const NoThrow = Tester(f => false);//!CaughtException(f));
 
 function Throws(name, Fn) {
   let threw = false;
@@ -85,21 +73,9 @@ function NoThrow(name, Fn) {
   else l(name+' throws no exception',Fn,'[no exception]',passed,'na');
 }
 
-const compare = fp.equals;
-// function compare(a, b) {  
-//   if (typeof a !== typeof b) return false;
-//   if (a==null) return true;
-//   if (Array.isArray(a)) {
-//     if (a.length !== b.length) return false;
-//     return a.reduce((acc, curr, idx) => {
-//       if (!acc) return false;
-//       if (curr != b[idx]) return false;
-//       return true;
-//     }, true);
-//   } else if (typeof a === 'object') {
-//     fail('compare(Object, Object) is not implemented');
-//   } else return a==b;
-// }
+const fp = require('./fp');
+
+const Compare = Comparator(fp.equals);
 
 //const a = [1, 2, [3,4], 5, [6, [7, 8]]];
 
@@ -133,10 +109,10 @@ Compare('flatten() Flatten nested array', () => fp.flatten([1, 2, [3,4], 5, [6, 
 
 const a = Object.freeze([1, 2, 3, 4, 5]);
 
-NoThrow('flatten() Input not mutated', () => {fp.flatten(a)}); 
+NoThrow('flatten() Input not mutated', () => fp.flatten(a)); 
 
-Throws('flatten() Non arrary input', () => {fp.flatten(6)});
-Throws('flatten() No input', () => {fp.flatten()});
+Throws('flatten() Non arrary input', () => fp.flatten(6));
+Throws('flatten() No input', () => fp.flatten());
 
 // Chain Evaluation
 function pass(v) { return v; }
@@ -174,7 +150,7 @@ Compare('sort() Sort strings by value', () => fp.sort(fp.byValue)(['f','t','d','
 
 //console.log(JSON.stringify(fp.zip([1,2,3])([4,5])));
 //=================================
-const S = require('./index');
+const S = require('./sift');
 
 Compare('validator() True case returns value', () => S.validator(() => true)([1]), [1]);
 Compare('validator() False case returns null', () => S.validator(() => false)([1]), null);

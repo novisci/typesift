@@ -8,7 +8,5 @@
   },
   "author": "Paul Rowan <prowan@novisci.com>",
   "license": "ISC",
-  "dependencies": {
-    "debug": "3.1.0"
-  }
+  "dependencies": {}
 }
