@@ -3,15 +3,15 @@ const log = [];
 let widths = [];
 function l() {
   let line = [...arguments].map(x => (typeof x === 'string') ? x : (typeof x === 'function') ? x.toString() : JSON.stringify(x));
-  widths = line.map( (x,i) => {
-    if (!widths[i]) widths[i] = 0;
-    x = x.replace(/\x1b.*m/, '');
-    return Math.max(x.length, widths[i]);
+  line.map( (x,i) => {
+    if (typeof widths[i] === 'undefined') widths[i] = 0;
+    x = x.replace(/\u001b\[[0-9]*m/, '');
+    widths[i] = Math.max(x.length, widths[i]);
   });
   log.push(line);
 }
 function logprint() {
-
+  console.log(widths);
   log.map(v => {
     console.log(...v.map((x,i) => x.padEnd(widths[i]+1)));
   });
@@ -73,12 +73,11 @@ function NoThrow(name, Fn) {
   else l(name+' throws no exception',Fn,'[no exception]',passed,'na');
 }
 
-const fp = require('./fp');
+const fp = require('./lib/fp');
 
 const Compare = Comparator(fp.equals);
 
 //const a = [1, 2, [3,4], 5, [6, [7, 8]]];
-
 l('TEST NAME','FUNCTION','VALUE','RESULT','TIME');
 
 // Equals
@@ -146,11 +145,38 @@ Compare('shift() Shift array removes first element', () => fp.shift([1,2,3,4]), 
 Compare('unshift() Unshift pushes value to first element', () => fp.unshift(1)([2,3,4]), [1,2,3,4]);
 
 Compare('sort() Sort numbers by value', () => fp.sort(fp.byValue)([6,2,4,5,3,7]), [2,3,4,5,6,7]);
-Compare('sort() Sort strings by value', () => fp.sort(fp.byValue)(['f','t','d','h','w','u']), ['d','f','h','t','u','w']);;
+Compare('sort() Sort strings by value', () => fp.sort(fp.byValue)(['f','t','d','h','w','u']), ['d','f','h','t','u','w']);
+
+//=================================
+const T = require('./lib/tuple');
+
+//l(' ');
+
+Compare('isNull() returns true for empty list', () => T.isNull([]), true);
+Compare('isNull() returns false for list with elements', () => T.isNull([1]), false);
+
+Compare('head() returns first element', () => T.head([1]), 1);
+Compare('head() returns first element in many element list', () => T.head([1,2,3,4]), 1);
+Compare('head() returns empty (null) for empty list', () => T.head([]), []);
+
+Compare('tail() returns elements [1..n]', () => T.tail([1,2,3,4,5]), [2,3,4,5]);
+Compare('tail() returns first empty (null) for one element list', () => T.tail([1]), []);
+Compare('tail() returns empty (null) for empty list', () => T.tail([]), []);
+
+Compare('cons() adds an element to an empty list', ()=>T.cons(5)([]), [5]);
+Compare('cons() adds an element to a populated list', ()=>T.cons(5)([1,2,3]), [5,1,2,3]);
+
+Compare('length() returns 0 for empty list', ()=>T.length([]), 0);
+Compare('length() returns 5 for 5 element list', () => T.length([1,2,3,4,5]), 5);
+
+Compare('last() returns empty (null) for empty list', () => T.last([]), []);
+Compare('last() returns the last element in a list', () => T.last([1,2,3,4,5]), 5);
 
 //console.log(JSON.stringify(fp.zip([1,2,3])([4,5])));
 //=================================
-const S = require('./sift');
+const S = require('./lib/sift');
+
+//l(' ');
 
 Compare('validator() True case returns value', () => S.validator(() => true)([1]), [1]);
 Compare('validator() False case returns null', () => S.validator(() => false)([1]), null);
