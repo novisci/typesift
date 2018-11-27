@@ -1,101 +1,25 @@
-// Set up logging
-const log = [];
-let widths = [];
-function l() {
-  let line = [...arguments].map(x => (typeof x === 'string') ? x : (typeof x === 'function') ? x.toString() : JSON.stringify(x));
-  line.map( (x,i) => {
-    if (typeof widths[i] === 'undefined') widths[i] = 0;
-    x = x.replace(/\u001b\[[0-9]*m/, '');
-    widths[i] = Math.max(x.length, widths[i]);
-  });
-  log.push(line);
-}
-function logprint() {
-  console.log(widths);
-  log.map(v => {
-    console.log(...v.map((x,i) => x.padEnd(widths[i]+1)));
-  });
-}
-const FgRed = "\x1b[31m";
-const FgGreen = "\x1b[32m";
-const Reset = "\x1b[0m";
-const failed = FgRed+'FAILED'+Reset;
-const passed = FgGreen+' pass '+Reset;
-
-// Timing functions
-function parseHrtimeToMicroseconds(hrtime) {
-  var seconds = (hrtime[0] + (hrtime[1] / 1e3));
-  return seconds;
-}
-
-function timeF(fn) {
-  var startTime = process.hrtime();
-  fn();
-  return parseHrtimeToMicroseconds(process.hrtime(startTime));
-}
-
-const iterations = 100;
-function timeFunction(fn) {
-  let t = [...Array(iterations)].map(() => timeF(fn));
-
-  let st = [].concat(t).sort();
-  let med = st[st.length/2];
-  med = med.toFixed(2).padStart(5);
-
-  return `${med} 𝛍s`;
-}
-
-// Test harness functions
-const Tester = (fnTest) => (name, ...args) => { 
-  // Perform test and emit a log entry 
-  l(name, args[0], args[0](), fnTest(...args) ? passed : failed, timeFunction(args[0]));
-};
-
-const True = Tester(f => f());
-const False = Tester(f => !f());
-const Comparator = (fnCompare) => Tester((fnA,b) => fnCompare(fnA(),b));
-
-const CaughtException = (f) => {try {f();} catch(e) {return true;} return false;};
-// const Throws = Tester(f => true);//CaughtException(f));
-// const NoThrow = Tester(f => false);//!CaughtException(f));
-
-function Throws(name, Fn) {
-  let threw = false;
-  try{ Fn() } catch(e) {threw = true;}
-  if (!threw) l(name+' throws exception',Fn,'[no exception]',failed,'na');
-  else l(name+' throws exception',Fn,'[exception]',passed,'na');
-}
-
-function NoThrow(name, Fn) {
-  let threw = false;
-  try{ Fn() } catch(e) {threw = true;throw e;}
-  if (threw) l(name+' throws no exception',Fn,'[exception]',failed,'na');
-  else l(name+' throws no exception',Fn,'[no exception]',passed,'na');
-}
-
+const _ = require('./lib/testy.js');
 const fp = require('./lib/fp');
 
-const Compare = Comparator(fp.equals);
-
-//const a = [1, 2, [3,4], 5, [6, [7, 8]]];
-l('TEST NAME','FUNCTION','VALUE','RESULT','TIME');
+const Compare = _.Comparator(fp.equals);
 
 // Equals
-True('equals() Test equality of flat arrays', () => fp.equals([1,2,3],[1,2,3]));
-True('equals() Test equality of nested arrays', () => fp.equals([1,[2,3]],[1,[2,3]]));
-True('equals() Test equality of multiple nested arrays', () => fp.equals([[1,2],[3,4]],[[1,2],[3,4]]));
-False('equals() Test inequality of different types', () => fp.equals([1,2,3],4));
-False('equals() Test inequality different length arrays', () => fp.equals([1,2,3],[4,5]));
-True('equals() Test equality of null', () => fp.equals(null,null));
-True('equals() Test nested null', () => fp.equals([[1,4],[2,5],[3,null]],[[1,4],[2,5],[3,null]]));
-False('equals() Test inequality of null and undefined', () => fp.equals([null], fp.vector(1)));
-False('equals() Test inequality of undefined and null', () => fp.equals(fp.vector(1), [null]));
-True('equals() Test empty object equality', () => fp.equals({},{}));
-True('equals() Test object equality', () => fp.equals({a:1,b:2},{a:1,b:2}));
-True('equals() Test order independence of keys', () => fp.equals({a:1,b:2},{b:2,a:1}));
-False('equals() Test object inequality', () => fp.equals({a:1,b:2},{a:1}));
-False('equals() Test object inequality', () => fp.equals({a:1,b:2},{a:1,b:4}));
-True('equals() Test nested object equality', () => fp.equals({a:1,b:{c:4,d:{e:5}}},{a:1,b:{c:4,d:{e:5}}}));
+_.True('equals() Test equality of flat arrays', () => fp.equals([1,2,3],[1,2,3]));
+_.True('equals() Test equality of nested arrays', () => fp.equals([1,[2,3]],[1,[2,3]]));
+_.True('equals() Test equality of multiple nested arrays', () => fp.equals([[1,2],[3,4]],[[1,2],[3,4]]));
+_.False('equals() Test inequality of different types', () => fp.equals([1,2,3],4));
+_.False('equals() Test inequality different length arrays', () => fp.equals([1,2,3],[4,5]));
+_.True('equals() Test equality of null', () => fp.equals(null,null));
+_.True('equals() Test nested null', () => fp.equals([[1,4],[2,5],[3,null]],[[1,4],[2,5],[3,null]]));
+_.False('equals() Test inequality of null and undefined', () => fp.equals([null], fp.vector(1)));
+_.False('equals() Test inequality of undefined and null', () => fp.equals(fp.vector(1), [null]));
+_.True('equals() Test empty object equality', () => fp.equals({},{}));
+_.True('equals() Test object equality', () => fp.equals({a:1,b:2},{a:1,b:2}));
+_.True('equals() Test order independence of keys', () => fp.equals({a:1,b:2},{b:2,a:1}));
+_.False('equals() Test object inequality', () => fp.equals({a:1,b:2},{a:1}));
+_.False('equals() Test object inequality', () => fp.equals({a:1,b:2},{a:1,b:4}));
+_.True('equals() Test nested object equality', () => fp.equals({a:1,b:{c:4,d:{e:5}}},{a:1,b:{c:4,d:{e:5}}}));
+_.True('equals() Test nested object equality', () => fp.equals({a:'1',b:{c:true,d:{e:5}}},{a:'1',b:{c:true,d:{e:5}}}));
 
 Compare('ifelse() Execeute true case on true', () => fp.ifelse(()=>'yes')(()=>'no')(true), 'yes');
 Compare('ifelse() Execeute false case on false', () => fp.ifelse(()=>'yes')(()=>'no')(false), 'no');
@@ -108,20 +32,20 @@ Compare('flatten() Flatten nested array', () => fp.flatten([1, 2, [3,4], 5, [6, 
 
 const a = Object.freeze([1, 2, 3, 4, 5]);
 
-NoThrow('flatten() Input not mutated', () => fp.flatten(a)); 
+_.NoThrow('flatten() Input not mutated', () => fp.flatten(a)); 
 
-Throws('flatten() Non arrary input', () => fp.flatten(6));
-Throws('flatten() No input', () => fp.flatten());
+_.Throws('flatten() Non arrary input', () => fp.flatten(6));
+_.Throws('flatten() No input', () => fp.flatten());
 
 // Chain Evaluation
 function pass(v) { return v; }
 function accum(v) { return v+1; }
 function pusher(v) { return v.concat([1]); }
 
-True('chainEval() Evaluate flat array with passthru', () => fp.chainEval([pass, pass, pass])(5) == 5);
-True('chainEval() Evaluate flat array with accumulate', () => fp.chainEval([accum, accum, accum])(1) == 4);
-True('chainEval() Evaluate nested array with passthru', () => fp.chainEval([pass, [pass, pass]])(5) == 5);
-True('chainEval() Evaluate nested array with accumulate', () => fp.chainEval([[accum, accum], accum])(1) == 4);
+_.True('chainEval() Evaluate flat array with passthru', () => fp.chainEval([pass, pass, pass])(5) == 5);
+_.True('chainEval() Evaluate flat array with accumulate', () => fp.chainEval([accum, accum, accum])(1) == 4);
+_.True('chainEval() Evaluate nested array with passthru', () => fp.chainEval([pass, [pass, pass]])(5) == 5);
+_.True('chainEval() Evaluate nested array with accumulate', () => fp.chainEval([[accum, accum], accum])(1) == 4);
 
 Compare('chainEval() Evaluate concatenate array', () => fp.chainEval([pusher, pusher, pusher])([1]), [1, 1, 1, 1] );
 
@@ -132,8 +56,8 @@ missing1[1] = 6;
 
 //console.log(missing1, missing2);
 
-False('equals() Check nested null vs undefined', () => fp.equals(missing2,[3,null]));
-False('equals() Check nested undefined vs null', () => fp.equals(missing1,[null,6]));
+_.False('equals() Check nested null vs undefined', () => fp.equals(missing2,[3,null]));
+_.False('equals() Check nested undefined vs null', () => fp.equals(missing1,[null,6]));
 
 Compare('zip() Zip valid array inputs', () => fp.zip([1,2,3])([4,5,6]), [[1,4],[2,5],[3,6]]);
 Compare('zip() Missing values are null', () => fp.zip([1,2,3])([4,5]), [[1,4],[2,5],missing2]);
@@ -178,9 +102,9 @@ const S = require('./lib/sift');
 
 //l(' ');
 
-Compare('validator() True case returns value', () => S.validator(() => true)([1]), [1]);
-Compare('validator() False case returns null', () => S.validator(() => false)([1]), null);
-Compare('validator() True case with null input returns null', () => S.validator(true)(null), null);
+Compare('validator() _.True case returns value', () => S.validator(() => true)([1]), [1]);
+Compare('validator() _.False case returns null', () => S.validator(() => false)([1]), null);
+Compare('validator() _.True case with null input returns null', () => S.validator(() => true)(null), null);
 
 Compare('numeric() Integer case returns value', () => S.numeric(2), 2);
 Compare('numeric() Float case returns value', () => S.numeric(2.23), 2.23);
@@ -222,17 +146,38 @@ Compare('chainEval(def1) with invalid numeric input', () => fp.chainEval(def1)(1
 Compare('chainEval(def1) with null input returns default value', () => fp.chainEval(def1)(null), 4);
 Compare('chainEval(def1) with string input returns default value', () => fp.chainEval(def1)('fred'), 4);
 
-Compare('structEval() Boolean with no value', () => S.structEval(['boolean',true])(), true);
-Compare('structEval() Boolean with value', () => S.structEval(['boolean',true])(false), false);
-Compare('structEval() Boolean with non-boolean value', () => S.structEval(['boolean',true])('string'), true);
+const def2 = ['boolean',true];
 
-Compare('structEval() Integer with no value', () => S.structEval(['integer',[S.rangeLimit(2,5)], 3])(), 3);
-Compare('structEval() Integer with value', () => S.structEval(['integer',[S.rangeLimit(2,5)], 3])(4), 4);
-Compare('structEval() Integer with out of range value', () => S.structEval(['integer',[S.rangeLimit(2,5)], 3])(7), 3);
+Compare('structEval() Boolean with no value', () => S.structEval(def2)(), true);
+Compare('structEval() Boolean with value', () => S.structEval(def2)(false), false);
+Compare('structEval() Boolean with non-boolean value', () => S.structEval(def2)('string'), true);
 
-True('structEval() Integer with out of range value and no default', () => S.structEval(['integer', [S.rangeLimit(2,5)]])() == null  );
+const def3 = ['integer',[S.rangeLimit(2,5)], 3];
 
-logprint();
+Compare('structEval() Integer with no value', () => S.structEval(def3)(), 3);
+Compare('structEval() Integer with value', () => S.structEval(def3)(4), 4);
+Compare('structEval() Integer with out of range value', () => S.structEval(def3)(7), 3);
+
+_.True('structEval() Integer with out of range value and no default', () => S.structEval(['integer', [S.rangeLimit(2,5)]])() == null  );
+
+const def4 = {
+  a: ['integer', 5],
+  b: ['boolean', true],
+  c: ['boolean'],
+  d: ['string', [S.enumLimit(['blue','green'])], 'blue'],
+  e: {
+    z: ['float', 0.4],
+    y: ['float', [S.rangeLimit(2.5, 8.7)]]
+  }
+};
+
+//console.log(JSON.stringify(S.structEval(def4)(), null, ' '));
+
+Compare('structEval() Object definition returns default properties', () => S.structEval(def4)(), {a:5,b:true,d:'blue',e:{z:0.4}});
+
+_.logprint();
+process.exit(_.exitCode());
+
 
 // const tests = [
 //   // Test simple values, not structs
