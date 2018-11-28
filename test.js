@@ -102,9 +102,9 @@ const S = require('./lib/sift');
 
 //l(' ');
 
-Compare('validator() _.True case returns value', () => S.validator(() => true)([1]), [1]);
-Compare('validator() _.False case returns null', () => S.validator(() => false)([1]), null);
-Compare('validator() _.True case with null input returns null', () => S.validator(() => true)(null), null);
+Compare('validator() True case returns value', () => S.validator(() => true)([1]), [1]);
+Compare('validator() False case returns null', () => S.validator(() => false)([1]), null);
+Compare('validator() True case with null input returns null', () => S.validator(() => true)(null), null);
 
 Compare('numeric() Integer case returns value', () => S.numeric(2), 2);
 Compare('numeric() Float case returns value', () => S.numeric(2.23), 2.23);
@@ -173,7 +173,12 @@ const def4 = {
 
 //console.log(JSON.stringify(S.structEval(def4)(), null, ' '));
 
+console.log(S.keys(def4));
+
 Compare('structEval() Object definition returns default properties', () => S.structEval(def4)(), {a:5,b:true,d:'blue',e:{z:0.4}});
+Compare('structEval() Stray properties are pruned', () => S.structEval(def4)({g:4}), {a:5,b:true,d:'blue',e:{z:0.4}});
+Compare('structEval() Valid properties are retained', () => S.structEval(def4)({e:{z:0.9}}), {a:5,b:true,d:'blue',e:{z:0.9}});
+
 
 _.logprint();
 process.exit(_.exitCode());
