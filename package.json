@@ -1,6 +1,6 @@
 {
   "name": "typesift",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NoviSci compact complex data type definitions and value validation",
   "main": "index.js",
   "scripts": {
