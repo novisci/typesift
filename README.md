@@ -1,5 +1,7 @@
 # `typesift` Package
 
+>This package is UNFINISHED and still under development
+
 Defines a compact specification of nested object data structures. Allows a single data structure to describe a complex type which can be used to create default initial values of the structure and validation of data structures claiming to conform to a particular structure.
 
 The idea is to use the definition to build a set of functions which take input data whish may or may not conform to the declared structure. It's simple -- dirty data in, clean data out.  Or, dirty data in, and a list of validation errors out.  This is intended to reduce the amount of wordy and repeptitive valid value checking or structure initialization and keep the defintion of the data structure complete and in one place.

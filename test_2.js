@@ -106,39 +106,39 @@ Compare('validator() True case returns value', () => S.validator(() => true)([1]
 Compare('validator() False case returns null', () => S.validator(() => false)([1]), null);
 Compare('validator() True case with null input returns null', () => S.validator(() => true)(null), null);
 
-Compare('numeric() Integer case returns value', () => S.validate([S.numeric])(2), 2);
-Compare('numeric() Float case returns value', () => S.validate([S.numeric])(2.23), 2.23);
-Compare('numeric() String case returns null', () => S.validate([S.numeric])('fred'), null);
-Compare('numeric() Null input returns null', () => S.validate([S.numeric])(null), null);
+Compare('numeric() Integer case returns value', () => S.numeric(2), 2);
+Compare('numeric() Float case returns value', () => S.numeric(2.23), 2.23);
+Compare('numeric() String case returns null', () => S.numeric('fred'), null);
+Compare('numeric() Null input returns null', () => S.numeric(null), null);
 
-Compare('string() Numeric case returns null', () => S.validate([S.string])(2), null);
-Compare('string() String case returns null', () => S.validate([S.string])('fred'), 'fred');
-Compare('string() Null input returns null', () => S.validate([S.string])(null), null);
+Compare('string() Numeric case returns null', () => S.string(2), null);
+Compare('string() String case returns null', () => S.string('fred'), 'fred');
+Compare('string() Null input returns null', () => S.string(null), null);
 
-Compare('lowLimit() Non-numeric type returns null', () => S.validate([S.lowLimit(5)])('fred'), null);
-Compare('lowLimit() Above limit returns value', () => S.validate([S.lowLimit(5)])(8), 8);
-Compare('lowLimit() Below limit returns null', () => S.validate([S.lowLimit(5)])(3), null);
-Compare('lowLimit() Null input returns null', () => S.validate([S.lowLimit(5)])(null), null);
+Compare('lowLimit() Non-numeric type returns null', () => S.lowLimit(5)('fred'), null);
+Compare('lowLimit() Above limit returns value', () => S.lowLimit(5)(8), 8);
+Compare('lowLimit() Below limit returns null', () => S.lowLimit(5)(3), null);
+Compare('lowLimit() Null input returns null', () => S.lowLimit(5)(null), null);
 
-Compare('highLimit() Non-numeric type returns null', () => S.validate([S.highLimit(5)])('fred'), null);
-Compare('highLimit() Above limit returns null', () => S.validate([S.highLimit(5)])(8), null);
-Compare('highLimit() Below limit returns value', () => S.validate([S.highLimit(5)])(3), 3);
-Compare('highLimit() Null input returns null', () => S.validate([S.highLimit(5)])(null), null);
+Compare('highLimit() Non-numeric type returns null', () => S.highLimit(5)('fred'), null);
+Compare('highLimit() Above limit returns null', () => S.highLimit(5)(8), null);
+Compare('highLimit() Below limit returns value', () => S.highLimit(5)(3), 3);
+Compare('highLimit() Null input returns null', () => S.highLimit(5)(null), null);
 
-Compare('rangeLimit() Non-numeric type returns null', () => S.validate([S.lowLimit(5)])('fred'), null);
-Compare('rangeLimit() In range returns value', () => S.validate([S.rangeLimit(3,5)])(4), 4);
-Compare('rangeLimit() Out of range returns null', () => S.validate([S.rangeLimit(3,5)])(8), null);
-Compare('rangeLimit() Null input returns null', () => S.validate([S.rangeLimit(3,5)])(null), null);
+Compare('rangeLimit() Non-numeric type returns null', () => S.lowLimit(5)('fred'), null);
+Compare('rangeLimit() In range returns value', () => S.rangeLimit(3,5)(4), 4);
+Compare('rangeLimit() Out of range returns null', () => S.rangeLimit(3,5)(8), null);
+Compare('rangeLimit() Null input returns null', () => S.rangeLimit(3,5)(null), null);
 
-Compare('enumLimit() Value in collection returns value', () => S.validate([S.enumLimit(['red','blue'])])('red'), 'red');
-Compare('enumLimit() Value not in collection returns null', () => S.validate([S.enumLimit(['red','blue'])])('green'), null);
-Compare('enumLimit() Null input returns null', () => S.validate([S.enumLimit(['red','blue'])])(null), null);
-Compare('enumLimit() Numeric input returns null', () => S.validate([S.enumLimit(['red','blue'])])(5), null);
+Compare('enumLimit() Value in collection returns value', () => S.enumLimit(['red','blue'])('red'), 'red');
+Compare('enumLimit() Value not in collection returns null', () => S.enumLimit(['red','blue'])('green'), null);
+Compare('enumLimit() Null input returns null', () => S.enumLimit(['red','blue'])(null), null);
+Compare('enumLimit() Numeric input returns null', () => S.enumLimit(['red','blue'])(5), null);
 
 Compare('defaultValue() Null input receives default', () => S.defaultValue(5)(null), 5);
 Compare('defaultValue() Non-null input returns value', () => S.defaultValue(5)(10), 10);
 
-const def1 = [S.validate([S.numeric, S.rangeLimit(3,8)]), S.defaultValue(4)];
+const def1 = [S.numeric, [S.rangeLimit(3,8), S.defaultValue(4)]];
 //const def2 = [S.string, S.enumLimit(['red','blue']), S.defaultValue('blue')];
 
 Compare('chainEval(def1) with valid numeric input', () => fp.chainEval(def1)(8), 8);
